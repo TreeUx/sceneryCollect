@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bx.touristsinfo.dao.DetailParkInfoMapper">
+    <!-- 查询所有景区名称 -->
+    <select id="findParkNameInfo" resultType="java.lang.String">
+      SELECT
+        name
+      FROM
+        tourist_info
+    </select>
+
+    <!-- 保存全球景点数据到tourist_detail表中 -->
+    <insert id="saveDetailInfo" parameterType="com.bx.touristsinfo.model.TouristDetail">
+      INSERT INTO
+        tourist_detail(
+          traffic_info,address,nation,province,city,area,name,avg_cost,best_season
+          ,suggest_play_time,open_time,jounery_rank,friendship_tips,more_desc,phone
+          ,location,main_score,impression,detail_images,ticket_info,going_count,visa_difficulty,web_site
+        ) VALUES (
+        #{traffic_info},#{address},#{nation},#{province},#{city},#{area},#{name},#{avg_cost},#{best_season}
+        ,#{suggest_play_time},#{open_time},#{jounery_rank},#{friendship_tips},#{more_desc},#{phone},#{location}
+        ,#{main_score},#{impression},#{detail_images},#{ticketInfo},#{going_count},#{visa_difficulty},#{web_site}
+      )
+    </insert>
+
+    <!-- 获取全球坐标信息 -->
+    <select id="getLocationInfo" resultType="java.util.Map">
+        SELECT
+          id,
+          com_central
+        FROM
+          bx_region
+        WHERE
+          id <![CDATA[>]]> 10265
+    </select>
+
+    <!-- 添加时区信息 -->
+    <update id="updateTimezoneInfo" parameterType="java.util.Map">
+        UPDATE
+          bx_region
+        SET
+          dst_offset = #{dst_offset},
+          time_zone_id = #{time_zone_id},
+          raw_offset = #{raw_offset}
+        WHERE
+          id = #{id}
+    </update>
+
+    <!-- 查询bx_region表中坐标为空的数据 -->
+    <select id="findCitys" resultType="java.util.Map">
+        SELECT
+            id,
+            area_name
+        FROM
+            bx_region
+        WHERE
+            com_central = ''
+    </select>
+
+    <!-- 修改bx_region数据库中坐标为空的值 -->
+    <update id="updateCityLocationInfos" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE
+              bx_region
+            SET
+              com_central = #{item.com_central}
+            WHERE
+              id = #{item.id}
+        </foreach>
+    </update>
+</mapper>

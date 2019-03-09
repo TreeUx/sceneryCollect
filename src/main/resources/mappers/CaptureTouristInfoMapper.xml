@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bx.touristsinfo.dao.CaptureTouristInfoMapper">
+    <!-- 查询指定城市信息 -->
+    <select id="queryCityInfo" resultType="java.util.Map">
+            SELECT
+                id,
+                area_name
+            FROM
+                bx_region
+            WHERE
+                id = #{id}
+                OR parent_id = #{id}
+    </select>
+
+    <!-- 查询数据是否已经存在 -->
+    <select id="findCountByUid" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT
+          COUNT(1)
+        FROM
+          tourist_info
+        WHERE
+          name = #{name}
+    </select>
+
+    <!-- 插入全球景点等信息 -->
+    <insert id="addBdTouristsInfo" parameterType="com.bx.touristsinfo.model.BxMerchant">
+        INSERT INTO
+          bx_merchant
+            (
+            state,province,city,district,mer_name,mer_address,mer_central,mer_duplex,
+            mer_type,mer_begining,mer_moment,mer_time,timezone,dst_offset,raw_offset
+            ) VALUES (
+            #{state},#{province},#{city},#{district},#{merName},#{merAddress},#{merCentral},#{merDuplex}
+            ,#{merType},#{merBegining},#{merMoment},now(),#{timezone},#{dstOffset},#{rawOffset}
+            )
+     </insert>
+
+    <!-- 查询所有景点数据 -->
+    <select id="findParkInfos" resultType="java.util.Map">
+        SELECT
+            city,
+            name
+        FROM
+            tourist_info
+        WHERE
+            type = 4
+    </select>
+
+    <!--获取省市区id-->
+    <select id="queryId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT
+        id
+        FROM
+            bx_region
+        WHERE
+            area_name = #{id}
+    </select>
+
+    <!-- 修改景点出入口数据 -->
+    <update id="updateNaviLocaByUid" parameterType="java.util.Map">
+        UPDATE
+          tourist_info
+        SET
+          navi_location = #{navi_location}
+        WHERE
+          uid = #{uid}
+    </update>
+
+    <!--根据城市名称查询时区信息-->
+    <select id="queryTimezoneInfo" resultType="java.util.Map">
+        SELECT
+            time_zone_id "timezoneId",
+            raw_offset "rawOffset",
+            dst_offset "dstOffset"
+        FROM
+            bx_region
+        WHERE
+            id = #{cityId}
+    </select>
+
+    <!--采集全球数据-->
+    <select id="queryGlobalCityInfo" resultType="java.util.Map">
+        SELECT
+            id,
+            area_name
+        FROM
+            bx_region
+        WHERE
+            parent_id
+        NOT IN
+            (0, 33, 34)
+    </select>
+    <select id="queryIdByCity" resultType="java.util.Map">
+        SELECT
+          id "id",
+          parent_id "parentid"
+        FROM
+          bx_region
+        WHERE
+          area_name LIKE #{city}
+    </select>
+    <!--根据父类id获取相应城市-->
+    <select id="queryInfoByParentid" resultType="java.util.Map">
+        SELECT
+            id,
+            area_name
+        FROM
+            bx_region
+        WHERE
+            parent_id = #{id}
+    </select>
+    <select id="queryCityNameById" resultType="java.lang.String">
+        SELECT
+          area_name
+        FROM
+          bx_region
+        WHERE
+          id = #{region}
+    </select>
+    <!--查询添加的景点是否已经存在-->
+    <select id="findCountByName" resultType="java.util.Map">
+        SELECT
+	        *
+        FROM
+            bx_merchant
+        WHERE
+            mer_name LIKE #{merName}
+        AND state = #{state}
+        AND province = #{province}
+    </select>
+    <!--校验用户名和密码-->
+    <select id="checkPsw" resultType="java.lang.Integer">
+        SELECT
+          COUNT(1)
+        FROM
+          bx_user
+        WHERE
+          username = #{username}
+          AND password = #{password}
+    </select>
+
+    <!--修改景点数据-->
+    <update id="udateSceneryInfo" parameterType="com.bx.touristsinfo.model.BxMerchant">
+        UPDATE
+          bx_merchant
+        SET
+          mer_name = #{merName},state = #{state},province = #{province},city = #{city},mer_address = #{merAddress}
+          ,mer_central = #{merCentral},mer_duplex = #{merDuplex},mer_begining = #{merBegining},mer_moment = #{merMoment}
+          ,mer_best=#{merBest},ticket_info = #{ticketInfo},traffic_info = #{trafficInfo},mer_type = #{merType}
+          ,mer_introduce = #{merIntroduce},mer_time = now()
+        WHERE
+          id = #{id}
+    </update>
+
+
+
+</mapper>
