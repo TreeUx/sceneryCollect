@@ -1,0 +1,8 @@
+F:\district\scope.txt
+F:\district\hotel.txt
+F:\district\cater.txt
+F:\district\shopping.txt
+F:\district\passageway.txt
+F:\district\relax.txt
+F:\district\traffic.txt
+F:\district\nature.txt
