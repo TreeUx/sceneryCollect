@@ -1,0 +1,15 @@
+{"province":"北京市","city":"北京市"}
+{"province":"北京市","city":"东城区"}
+{"province":"北京市","city":"西城区"}
+{"province":"北京市","city":"朝阳区"}
+{"province":"北京市","city":"丰台区"}
+{"province":"北京市","city":"石景山区"}
+{"province":"北京市","city":"海淀区"}
+{"province":"北京市","city":"门头沟区"}
+
+
+
+
+
+
+
