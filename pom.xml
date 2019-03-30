@@ -130,6 +130,11 @@
             <version>1.0.0</version>
         </dependency>
 
+        <dependency>
+        <groupId>com.banxing</groupId>
+        <artifactId>ZHConverter</artifactId>
+        <version>1.0.0</version>
+    </dependency>
 
     </dependencies>
 

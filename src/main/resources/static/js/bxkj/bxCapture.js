@@ -1,5 +1,12 @@
 var data;
 var map;
+/*坐标转换需要的常量 Start*/
+var x_PI = 3.14159265358979324 * 3000.0 / 180.0;
+var PI = 3.1415926535897932384626;
+var a = 6378245.0;
+var ee = 0.00669342162296594323;
+var transedPointStrs = "" //拼接后的原始坐标
+/*坐标转换需要的常量 End*/
 $(function () {
     for (var i = 0; i < GlobalCity.length; i++) { //国家
         $("#state").append(
@@ -96,10 +103,15 @@ function showInfo(e) {
         '<div class="row" style="padding: 7px;">' +
         '<div class="form-group">' +
         '<div class="col-sm-3" style="float: left;margin-left: -4px;">' +
-        '<label for="mer_duplex" class="control-label">出入口坐标：</label>' +
+        '<label for="mer_duplex_bd" class="control-label">出入口坐标：</label>' +
         '</div>' +
-        '<div class="col-sm-9"><input id="mer_duplex" name="mer_duplex" value="' + lng + "," + lat + '" style="margin-left: 10px;">'
+        '<div class="col-sm-9">' +
+        '<input type="hidden" id="mer_duplex" name="mer_duplex" value="">' +
+        '<input id="mer_duplex_bd" name="mer_duplex_bd" value="' + lng + "," + lat + '" style="margin-left: 10px;">'
         '</div>'
+    var pointList = new Array()
+    pointList.push(new BMap.Point(lng, lat)) //将百度坐标转换为原始坐标
+    transToGps(pointList, "#mer_duplex") //将百度坐标转换为原始坐标
     $("#addPoints").append(content)
 }
 //添加鼠标点击事件
@@ -131,6 +143,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var ticket_info = "" //门票信息
     var traffic_info = "" //交通信息
     var merchantId = "" //景点id
+    var mer_central = "" //中心点坐标
     if (data != undefined && data != null && data != "") {
         mer_name = data.mer_name
         mer_address = data.mer_address
@@ -142,7 +155,11 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         traffic_info = (data.traffic_info == undefined ? "" : data.traffic_info)
         mer_introduce = (data.mer_introduce == undefined ? "" : data.mer_introduce)
         merchantId = data.id
+        mer_central = data.mer_central // 数据库取出的原始坐标
     }
+    var pointList = new Array()
+    pointList.push(new BMap.Point(lng, lat))
+    transToGps(pointList, "#mer_central")
     //右键菜单
     var content = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" style="margin-left: 24px;" aria-hidden="true" >' +
         '<div class="modal-dialog">' +
@@ -195,7 +212,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<label for="" class="control-label">地图经纬度：</label>' +
         '</div>' +
         '<input id="merchantId" name="merchantId" type="hidden" value="' + merchantId + '"/>' +
-        '<input id="mer_central" name="mer_central" type="hidden" value="' + lng + "," + lat + '"/>' +
+        '<input id="mer_central" name="mer_central" type="hidden" value="' + mer_central + '"/>' +
         '<div class="col-sm-9"><label id="location" style="margin-left: 10px;">' + lng + "," + lat + '</label></div>' +
         '</div>' +
         '</div>' +
@@ -238,7 +255,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<label for="traffic_info" class="control-label"> 交通信息：</label>' +
         '</div>' +
         '<div class="col-sm-9">' +
-        '<input id="traffic_info" name="traffic_info" type="text" value="' + traffic_info + '" style="margin-left: 10px;" placeholder="请输入门票信息"/>' +
+        '<input id="traffic_info" name="traffic_info" type="text" value="' + traffic_info + '" style="margin-left: 10px;" placeholder="请输入交通信息"/>' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -339,6 +356,74 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         }
     }, 50);
 }
+
+//百度坐标转换为原始坐标
+var convertor = new BMap.Convertor()
+function transToGps(pointList, $name) {
+    convertor.translate(pointList, 5, 3, function (data) {
+        console.log(data)
+        if (data.status === 0) {
+            transedPointStrs = "" //拼接后的原始坐标
+            for (var k = 0; k < pointList.length; k++) {
+                var x2 = data.points[k].lng
+                var y2 = data.points[k].lat
+                var tempPoint = gcj02towgs84(x2, y2)
+                var x = tempPoint.lng
+                var y = tempPoint.lat
+                console.log(x + "," + y)
+                transedPointStrs = transedPointStrs + (x.toFixed(10) + "," + y.toFixed(10) + " ")  //拼接转换后的坐标
+                // $("#mer_central").val(transedPointStrs) //设置隐藏input为原始坐标
+                $($name).val(transedPointStrs) //设置隐藏input为原始坐标
+            }
+        }
+    })
+}
+/*GCJ02转WGS84坐标系 Start*/
+function gcj02towgs84(lng, lat) {
+    var transedpoint = {}
+    if (out_of_china(lng, lat)) {
+        return [lng, lat]
+    }
+    else {
+        var dlat = transformlat(lng - 105.0, lat - 35.0);
+        var dlng = transformlng(lng - 105.0, lat - 35.0);
+        var radlat = lat / 180.0 * PI;
+        var magic = Math.sin(radlat);
+        magic = 1 - ee * magic * magic;
+        var sqrtmagic = Math.sqrt(magic);
+        dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * PI);
+        dlng = (dlng * 180.0) / (a / sqrtmagic * Math.cos(radlat) * PI);
+        mglat = lat + dlat;
+        mglng = lng + dlng;
+        transedpoint.lng = lng * 2 - mglng
+        transedpoint.lat = lat * 2 - mglat
+        return transedpoint
+    }
+}
+
+function transformlat(lng, lat) {
+    var ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
+    ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0;
+    ret += (20.0 * Math.sin(lat * PI) + 40.0 * Math.sin(lat / 3.0 * PI)) * 2.0 / 3.0;
+    ret += (160.0 * Math.sin(lat / 12.0 * PI) + 320 * Math.sin(lat * PI / 30.0)) * 2.0 / 3.0;
+    return ret
+}
+
+function transformlng(lng, lat) {
+    var ret = 300.0 + lng + 2.0 * lat + 0.1 * lng * lng + 0.1 * lng * lat + 0.1 * Math.sqrt(Math.abs(lng));
+    ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0;
+    ret += (20.0 * Math.sin(lng * PI) + 40.0 * Math.sin(lng / 3.0 * PI)) * 2.0 / 3.0;
+    ret += (150.0 * Math.sin(lng / 12.0 * PI) + 300.0 * Math.sin(lng / 30.0 * PI)) * 2.0 / 3.0;
+    return ret
+}
+
+//判断是否在国内，不在国内则不做偏移
+function out_of_china(lng, lat) {
+    return (lng < 72.004 || lng > 137.8347) || ((lat < 0.8293 || lat > 55.8271) || false);
+}
+
+/*GCJ02转WGS84坐标系 End*/
+
 
 //采集目的地数据
 var capturing;

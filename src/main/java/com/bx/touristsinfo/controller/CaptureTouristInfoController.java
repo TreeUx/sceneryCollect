@@ -32,20 +32,22 @@ import java.util.*;
 @Log4j2
 @RequestMapping("/bx")
 public class CaptureTouristInfoController {
-    //        public static String typePath = "D:\\tourist\\oneLevelFile.txt";//一级行业分类列表（刀片机）
+//    public static String typePath = "D:\\tourist\\oneLevelFile.txt";//一级行业分类列表（刀片机）
 //    public static String tagPath = "D:\\tourist\\twoLevelFile.txt";//二级行业分类表名列表（刀片机）
-    public static String typePath = "F:\\district\\next\\oneLevelFile.txt";//一级行业分类列表
-    public static String tagPath = "F:\\district\\next\\twoLevelFile.txt";//二级行业分类表名列表
+    public static String typePath = "/deploy/production/bx-map/file-path/oneLevelFile.txt";//linux服务器
+    public static String tagPath = "/deploy/production/bx-map/file-path/twoLevelFile-Linux.txt";//linux服务器
+//    public static String typePath = "F:\\district\\next\\oneLevelFile.txt";//一级行业分类列表
+//    public static String tagPath = "F:\\district\\next\\twoLevelFile.txt";//二级行业分类表名列表
     @Autowired
     CaptureTouristInfoService captureTouristInfoService;
 
     /**
-      * @Author Breach
-      * @Description 用户登录
-      * @Date 2019/2/15
-      * @Param model
-      * @return java.lang.String
-      */
+     * @return java.lang.String
+     * @Author Breach
+     * @Description 用户登录
+     * @Date 2019/2/15
+     * @Param model
+     */
     @RequestMapping("/login")
     public String login(Model model) {
         model.addAttribute("title", "用户登录");
@@ -53,12 +55,12 @@ public class CaptureTouristInfoController {
     }
 
     /**
-      * @Author Breach
-      * @Description 校验用户名密码
-      * @Date 2019/2/15
-      * @Param
-      * @return java.util.Map<java.lang.String,java.lang.Object>
-      */
+     * @return java.util.Map<java.lang.String   ,   java.lang.Object>
+     * @Author Breach
+     * @Description 校验用户名密码
+     * @Date 2019/2/15
+     * @Param
+     */
     @RequestMapping("/check")
     @ResponseBody
     public Map<String, Object> checkInfo(HttpServletRequest request) {
@@ -69,7 +71,7 @@ public class CaptureTouristInfoController {
         para.put("username", username);
         para.put("password", password);
         int num = captureTouristInfoService.checkPsw(para); //校验用户名密码
-        if(num != 0) {
+        if (num != 0) {
             result.put("status", "success");
             result.put("msg", "登录成功");
         } else {
@@ -314,7 +316,7 @@ public class CaptureTouristInfoController {
         String cityId = region; //
         bmc.setCity(region);//市
         String query = request.getParameter("scenery_name"); //景区名称
-        if(region != "" && region != null && region != "undefined") {
+        if (region != "" && region != null && region != "undefined") {
             region = captureTouristInfoService.queryCityNameById(region); //查询城市名称
         } else { //如果城市为空，则根据景点名称直接扫描
             region = captureTouristInfoService.queryCityNameById(province);
@@ -345,7 +347,7 @@ public class CaptureTouristInfoController {
                     if (JSONObject.parseObject(results.get(0).toString()).containsKey("detail_info")) {
                         JSONObject detailInfo = JSONObject.parseObject(JSONObject.parseObject(results.get(0).toString()).get("detail_info").toString());
                         if (detailInfo.size() != 0 && !detailInfo.isEmpty()) {
-                            if(detailInfo.containsKey("navi_location")) {
+                            if (detailInfo.containsKey("navi_location")) {
                                 JSONObject navi_loca = JSONObject.parseObject(detailInfo.get("navi_location").toString());
                                 navi_location = new BigDecimal(navi_loca.get("lng").toString()).setScale(6, BigDecimal.ROUND_HALF_UP)
                                         + "," + new BigDecimal(navi_loca.get("lat").toString()).setScale(6, BigDecimal.ROUND_HALF_UP); //出入口坐标
@@ -403,7 +405,7 @@ public class CaptureTouristInfoController {
                         para.put("province", province);
                         para.put("merName", merName);
                         List<Map<String, Object>> sceneryLists = captureTouristInfoService.findCountByName(para);
-                        if(sceneryLists.isEmpty() && sceneryLists.size() == 0) { //查询景点是否已经添加
+                        if (sceneryLists.isEmpty() && sceneryLists.size() == 0) { //查询景点是否已经添加
                             Boolean bl = captureTouristInfoService.addBdTouristsInfo(bmc); //添加景点信息
                             if (bl) {
                                 result.put("status", "success");
@@ -432,12 +434,12 @@ public class CaptureTouristInfoController {
     }
 
     /**
-      * @Author Breach
-      * @Description 查询自动添加的景点信息
-      * @Date 2019/1/18
-      * @Param request
-      * @return java.util.Map<java.lang.String,java.lang.Object>
-      */
+     * @return java.util.Map<java.lang.String   ,   java.lang.Object>
+     * @Author Breach
+     * @Description 查询自动添加的景点信息
+     * @Date 2019/1/18
+     * @Param request
+     */
     @RequestMapping("/queryAddSceneryInfo")
     @ResponseBody
     public Map<String, Object> queryAddSceneryInfo(HttpServletRequest request) {
@@ -451,7 +453,7 @@ public class CaptureTouristInfoController {
         paras.put("province", province);
         paras.put("merName", merName);
         List<Map<String, Object>> sceneryLists = captureTouristInfoService.findCountByName(paras);
-        if(!sceneryLists.isEmpty() && sceneryLists.size() != 0) {
+        if (!sceneryLists.isEmpty() && sceneryLists.size() != 0) {
             result.put("status", "success");
             result.put("msg", "查询成功");
             result.put("data", sceneryLists);
@@ -463,12 +465,12 @@ public class CaptureTouristInfoController {
     }
 
     /**
-      * @Author Breach
-      * @Description 手动添加或者修改景点数据
-      * @Date 2019/1/18
-      * @Param
-      * @return java.util.Map<java.lang.String,java.lang.Object>
-      */
+     * @return java.util.Map<java.lang.String   ,   java.lang.Object>
+     * @Author Breach
+     * @Description 手动添加或者修改景点数据
+     * @Date 2019/1/18
+     * @Param
+     */
     @RequestMapping("/addOrUpdateSceneryInfo")
     @ResponseBody
     public Map<String, Object> addOrUpdateSceneryInfo(HttpServletRequest request) throws ParseException {
@@ -477,22 +479,22 @@ public class CaptureTouristInfoController {
         BxMerchant bmc = new BxMerchant();
         String merchantId = request.getParameter("merchantId");
         String merDuplex = ""; //双向出入口
-        if(merchantId != "" && merchantId != null) {
+        if (merchantId != "" && merchantId != null) {
             int merId = Integer.parseInt(merchantId);
             bmc.setId(merId); //景点Id
         }
-        String[] mer_duplex = request.getParameterValues("mer_duplex");
+        String[] mer_duplex = request.getParameterValues("mer_duplex"); //出入口坐标
         String merName = request.getParameter("scenery_name_add");
         String state = request.getParameter("state");
         String province = request.getParameter("province");
         String city = request.getParameter("city");
         String merAddress = request.getParameter("mer_address");
-        String merCentral = request.getParameter("mer_central");
+        String merCentral = request.getParameter("mer_central"); //中心点坐标
         Date merBegining = sdf.parse(request.getParameter("scenery_start_time"));
         Date merMoment = sdf.parse(request.getParameter("scenery_start_time"));
         String bestTime = request.getParameter("mer_best");
         int merBest = 0;
-        if(bestTime != "" && bestTime != null) {
+        if (bestTime != "" && bestTime != null) {
             merBest = Integer.parseInt(bestTime);
         }
         String ticketInfo = request.getParameter("ticket_info");
@@ -505,7 +507,7 @@ public class CaptureTouristInfoController {
         bmc.setProvince(province); //省
         bmc.setCity(city); //城市
         bmc.setMerAddress(merAddress); //详细地址
-        if(mer_duplex != null && mer_duplex.length != 0) {
+        if (mer_duplex != null && mer_duplex.length != 0) {
             for (int i = 0; i < mer_duplex.length; i++) {
                 merDuplex += (mer_duplex[i] + " ");
             }
@@ -519,7 +521,7 @@ public class CaptureTouristInfoController {
         bmc.setTrafficInfo(trafficInfo); //交通信息
         bmc.setMerType(merType); //商品类型
         bmc.setMerIntroduce(merIntroduce); //商品介绍
-        if(merchantId == "") { //保存新景点数据
+        if (merchantId == "") { //保存新景点数据
             //查询时区
             List<Map<String, Object>> timezoneLists = captureTouristInfoService.queryTimezoneInfo(city);
             int rawOffset = 0;
@@ -537,7 +539,7 @@ public class CaptureTouristInfoController {
             bmc.setDstOffset(dstOffset);
 
             boolean bl = captureTouristInfoService.addBdTouristsInfo(bmc);
-            if(bl) {
+            if (bl) {
                 result.put("status", "success");
                 result.put("msg", "保存成功");
             } else {
@@ -546,7 +548,7 @@ public class CaptureTouristInfoController {
             }
         } else { //修改已有的景点数据
             int num = captureTouristInfoService.udateSceneryInfo(bmc);
-            if(num > 0) {
+            if (num > 0) {
                 result.put("status", "success");
                 result.put("msg", "修改成功");
             } else {
