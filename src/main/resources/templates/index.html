@@ -107,6 +107,15 @@
     <div style="float: left;margin-left: 10px;">
         <input id="capture_scenery_input" type="button" value="景区定点采集" onclick="captureParkInfo(this)"></i>
     </div>
+    <div style="float: left;margin-left: 10px;">
+        <input id="bd_point" type="text" placeholder="输入需要转换的百度坐标" style="width: 150px;"></i>
+    </div>
+    <div style="float: left;margin-left: 10px;">
+        <input id="gps_point" type="text" placeholder="转换后的原始坐标系" style="width: 140px;"></i>
+    </div>
+    <div style="float: left;margin-left: 10px;">
+        <input type="button" value="点击转换" onclick="transedBdPoiToGpsPoi()"></i>
+    </div>
     </div>
 
     <!--<div style="float: left;margin-left: 10px;">

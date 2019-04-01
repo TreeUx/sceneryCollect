@@ -505,7 +505,7 @@ public class CaptureTouristInfoController {
         bmc.setMerName(merName); //景点名称
         bmc.setState(state); //国家
         bmc.setProvince(province); //省
-        bmc.setCity(city); //城市
+        bmc.setCity(("null".equals(city) || city == null) ? province : city); //城市
         bmc.setMerAddress(merAddress); //详细地址
         if (mer_duplex != null && mer_duplex.length != 0) {
             for (int i = 0; i < mer_duplex.length; i++) {

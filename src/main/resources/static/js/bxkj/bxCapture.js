@@ -722,3 +722,26 @@ function showWarning(title, msg) {
         content: msg
     });
 }
+
+/*百度坐标系转换为原始坐标系 Start*/
+function transedBdPoiToGpsPoi() {
+    var bd_poi = $("#bd_point").val() //要转换的百度坐标
+    var convertor = new BMap.Convertor()
+    var x = bd_poi.substring(0, bd_poi.indexOf(",")) //百度坐标系经度
+    var y = bd_poi.substring(bd_poi.indexOf(",") + 1, bd_poi.length) //百度坐标系纬度
+    var ggpoint = new BMap.Point(x, y)
+    var pointArr = new Array()
+    pointArr.push(ggpoint)
+    convertor.translate(pointArr, 5, 3, function (data) { //百度坐标系转换为国测局坐标系
+        console.log(data)
+        var x1 = data.points[0].lng
+        var y1 = data.points[0].lat
+        var wgsPoint = gcj02towgs84(x1, y1)
+        console.log("百度坐标系转换为国测局（原始坐标系）坐标系 Start")
+        console.log(wgsPoint)
+        console.log(wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10))
+        console.log("百度坐标系转换为国测局（原始坐标系）坐标系 End")
+        $("#gps_point").val(wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10))
+    })
+}
+/*百度坐标系转换为原始坐标系 End*/
