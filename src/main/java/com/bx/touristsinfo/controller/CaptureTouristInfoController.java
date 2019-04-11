@@ -30,7 +30,7 @@ import java.util.*;
  **/
 @Controller
 @Log4j2
-@RequestMapping("/bx")
+@RequestMapping("/")
 public class CaptureTouristInfoController {
 //    public static String typePath = "D:\\tourist\\oneLevelFile.txt";//一级行业分类列表（刀片机）
 //    public static String tagPath = "D:\\tourist\\twoLevelFile.txt";//二级行业分类表名列表（刀片机）
@@ -491,7 +491,7 @@ public class CaptureTouristInfoController {
         String merAddress = request.getParameter("mer_address");
         String merCentral = request.getParameter("mer_central"); //中心点坐标
         Date merBegining = sdf.parse(request.getParameter("scenery_start_time"));
-        Date merMoment = sdf.parse(request.getParameter("scenery_start_time"));
+        Date merMoment = sdf.parse(request.getParameter("scenery_end_time"));
         String bestTime = request.getParameter("mer_best");
         int merBest = 0;
         if (bestTime != "" && bestTime != null) {

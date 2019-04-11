@@ -1,22 +1,10 @@
 server:
   port: 8090
+  servlet:
+    context-path: /bx
 spring:
-  datasource:
-#    url: jdbc:mysql://localhost:3306/bxly-tourist?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
-#    url: jdbc:mysql://172.16.6.41:3306/bxly-tourist?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
-#    url: jdbc:mysql://139.199.72.118:3306/bx_travel?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
-    url: jdbc:mysql://139.199.72.118:3306/bx_travels?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
-    username: root
-#    password: root123
-    password: "@bx123456"
-    driver-class-name: com.mysql.jdbc.Driver
-    dbcp2:
-    # 此处设置test-while-idle: true和valication-query防止数据库连接池长时间不使用被回收，导致再次访问数据库报错
-    test-while-idle: true
-    validation-query: select 1
-    # test-on-borrow和test-on-return检测池里连接的可用性（生产环境一般不使用，考虑性能问题）
-#    test-on-borrow: true
-#    test-on-return: true
+  profiles:
+    active: prod
   #thymeleaf Start
   thymeleaf:
     #非严格检查
@@ -24,8 +12,8 @@ spring:
     encoding: UTF-8
     servlet:
       content-type: text/html
-      #开发时关闭缓存,不然没法看到实时页面
-    cache: false
+      #开发时关闭缓存(设置为false),不然没法看到实时页面
+    cache: true
     prefix: classpath:/templates/
     suffix: .html
     #thymeleaf End
