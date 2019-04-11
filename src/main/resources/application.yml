@@ -4,7 +4,7 @@ server:
     context-path: /bx
 spring:
   profiles:
-    active: prod
+    active: test
   #thymeleaf Start
   thymeleaf:
     #非严格检查

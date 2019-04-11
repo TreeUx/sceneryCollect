@@ -31,7 +31,35 @@ $(function () {
         var city = $("#city").find("option:selected").text();
         showMap(city)
     })
-})
+}) /*主函数*/
+/*校验时间 Start*/
+function checkStartTime() {
+    console.log("开始时间失焦事件")
+    var title = "有效性提示"
+    var start_time = $("#scenery_start_time").val()
+    var end_time = $("#scenery_end_time").val()
+    if(!test_7($("#scenery_start_time").val())) {
+        msg = "请输入有效时间"
+        showWarning(title, msg)
+    } else {
+        $("#scenery_end_time").val(addMin(start_time, 0))
+    }
+}
+function checkEndTime() {
+    console.log("开始时间失焦事件")
+    var title = "有效性提示"
+    var start_time = $("#scenery_start_time").val()
+    var end_time = $("#scenery_end_time").val()
+    var ck_res = validateTimePeriod(start_time, end_time);
+    if(!test_7($("#scenery_end_time").val())) {
+        msg = "请输入有效时间"
+        showWarning(title, msg)
+    } else if(!ck_res) {
+        var start_t = addMin(end_time, 1)
+        $("#scenery_start_time").val(start_t)
+    }
+}
+/*校验时间 End*/
 
 //展示地图
 function showMap(city) {
@@ -224,8 +252,8 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<label for="scenery_start_time scenery_end_time" class="control-label"><span  style="color: red;"> * </span>开放时段：</label>' +
         '</div>' +
         '<div class="col-sm-9">' +
-        '<input id="scenery_start_time" name="scenery_start_time" type="time" value="' + mer_begining + '" style="width: 70px;margin-left: 10px;"/> ~ &nbsp;&nbsp;&nbsp; ' +
-        '<input id="scenery_end_time" name="scenery_end_time" type="time" value="' + mer_moment + '" style="width: 70px;" />' +
+        '<input id="scenery_start_time" name="scenery_start_time" onblur="checkStartTime()" type="time" value="' + mer_begining + '" style="width: 70px;margin-left: 10px;"/> ~ &nbsp;&nbsp;&nbsp; ' +
+        '<input id="scenery_end_time" name="scenery_end_time" onblur="checkEndTime()" type="time" value="' + mer_moment + '" style="width: 70px;" />' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -745,3 +773,70 @@ function transedBdPoiToGpsPoi() {
     })
 }
 /*百度坐标系转换为原始坐标系 End*/
+
+//校验时间格式有效性
+function test_7(time) {
+    var timeRegex_2 = new RegExp("([0-1]?[0-9]|2[0-3]):([0-5][0-9])$");
+    var b_3 = timeRegex_2.test(time);
+    console.log(b_3)
+    return b_3;
+}
+
+// 查询校验,校验起始时间是否小于截至时间
+function validateTimePeriod(begin, end) { //begin：开始时间, end：结束时间
+    var b_len = begin.length
+    var b_index = begin.indexOf(":")
+    var b_t_h = begin.substring(0, b_index) // 时
+    var b_t_m = begin.substring(b_index+1, b_len) // 分
+    var e_len = end.length
+    var e_index = end.indexOf(":")
+    var e_t_h = end.substring(0, e_index) // 时
+    var e_t_m = end.substring(e_index+1, e_len) // 分
+    if(begin == end) {
+        return false;
+    } else if(parseInt(b_t_h) > parseInt(e_t_h) || (parseInt(b_t_h) == parseInt(e_t_h) && parseInt(b_t_m) > parseInt(e_t_m))) {
+        if("00:00" == end) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+// 操作结束时间大于开始时间
+function addMin(time_str, type) {
+    var len = time_str.length
+    var index = time_str.indexOf(":")
+    var t_h = time_str.substring(0, index) // 时
+    var t_h_f = time_str.substring(0, 1)
+    var t_h_e = time_str.substring(1, index)
+    var t_m = time_str.substring(index+1, len) // 分
+    var t_m_f = time_str.substring(index+1, index+2)
+    var t_m_e = time_str.substring(index+2, len)
+    if(type == 0) {
+        if(time_str == "23:59") {
+            time_str = "00:00"
+        } else if(t_m == "59") {
+            time_str = (parseInt(t_h)+1)+":00"
+        } else if(t_m_e == "9") {
+            time_str = t_h + ":"+(parseInt(t_m_f)+1)+"0"
+        } else {
+            time_str = t_h + ":" + t_m_f + (parseInt(t_m_e)+1)
+        }
+    } else {
+        if(time_str == "00:00") {
+            time_str = "23:59"
+        } else if(t_m == "00") {
+            console.log(parseInt(t_h)-1)
+            console.log(parseInt(t_h)-1 < 10)
+            console.log("0"+(parseInt(t_h)-1))
+            console.log(parseInt(t_h)-1 < 10 ? ("0"+(parseInt(t_h)-1)) : parseInt(t_h)-1)
+            time_str = (parseInt(t_h)-1 < 10 ? ("0"+(parseInt(t_h)-1)) : parseInt(t_h)-1)+":59"
+        } else if(t_m_e == "0") {
+            time_str = t_h + ":"+(parseInt(t_m_f)-1)+"9"
+        } else {
+            time_str = t_h + ":" + t_m_f + (parseInt(t_m_e)-1)
+        }
+    }
+    return time_str
+}
