@@ -308,7 +308,8 @@ public class CaptureTouristInfoController {
         Map<String, Object> param = new HashMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         BxMerchant bmc = new BxMerchant(); //商家表实体类
-        String navi_location = "";
+        String location = ""; // 中心点坐标
+        String navi_location = ""; // 出入口坐标
         String merName = ""; //景点名称
         String state = request.getParameter("state"); //国家
         String province = request.getParameter("province"); //省
@@ -339,6 +340,9 @@ public class CaptureTouristInfoController {
                     //父类uid
                     String parentUid = JSONObject.parseObject(results.get(0).toString()).getString("uid");
                     merName = JSONObject.parseObject(results.get(0).toString()).getString("name"); //景点名称
+                    JSONObject loca= JSONObject.parseObject(JSONObject.parseObject(results.get(0).toString()).getString("location")); //景点中心点坐标
+                    location = new BigDecimal(loca.get("lng").toString()).setScale(6, BigDecimal.ROUND_HALF_UP)
+                            + "," + new BigDecimal(loca.get("lat").toString()).setScale(6, BigDecimal.ROUND_HALF_UP); //景点中心点坐标
                     String merAddress = JSONObject.parseObject(results.get(0).toString()).getString("address"); //详细地址
 //                    province = JSONObject.parseObject(results.get(0).toString()).getString("province"); //省
 //                    String city = JSONObject.parseObject(results.get(0).toString()).getString("city"); //市
@@ -348,6 +352,7 @@ public class CaptureTouristInfoController {
                         JSONObject detailInfo = JSONObject.parseObject(JSONObject.parseObject(results.get(0).toString()).get("detail_info").toString());
                         if (detailInfo.size() != 0 && !detailInfo.isEmpty()) {
                             if (detailInfo.containsKey("navi_location")) {
+                                // 出入口坐标
                                 JSONObject navi_loca = JSONObject.parseObject(detailInfo.get("navi_location").toString());
                                 navi_location = new BigDecimal(navi_loca.get("lng").toString()).setScale(6, BigDecimal.ROUND_HALF_UP)
                                         + "," + new BigDecimal(navi_loca.get("lat").toString()).setScale(6, BigDecimal.ROUND_HALF_UP); //出入口坐标
@@ -392,7 +397,7 @@ public class CaptureTouristInfoController {
                         bmc.setDstOffset(dstOffset);
 
                         bmc.setMerDuplex(navi_location); //多出入口坐标
-                        bmc.setMerCentral(navi_location); //中心点坐标
+                        bmc.setMerCentral(location); //中心点坐标
                         bmc.setMerName(merName); //景点名称
                         bmc.setMerAddress(merAddress); //详细地址
                         bmc.setState(state); //国家
@@ -410,6 +415,7 @@ public class CaptureTouristInfoController {
                             if (bl) {
                                 result.put("status", "success");
                                 result.put("msg", "保存景点信息成功");
+                                result.put("mer_name", merName);
                             } else {
                                 result.put("status", "error");
                                 result.put("msg", "保存景点信息失败");
@@ -446,7 +452,7 @@ public class CaptureTouristInfoController {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> paras = new HashMap<>();
         String merName = request.getParameter("merName");
-        merName = "%" + merName + "%";
+//        merName = "%" + merName + "%";
         String state = request.getParameter("state");
         String province = request.getParameter("province");
         paras.put("state", state);
@@ -460,6 +466,34 @@ public class CaptureTouristInfoController {
         } else {
             result.put("status", "error");
             result.put("msg", "查询失败");
+        }
+        return result;
+    }
+    /**
+     * @return java.util.Map<java.lang.String   ,   java.lang.Object>
+     * @Author Breach
+     * @Description 修改自动添加的景点坐标为Gps坐标
+     * @Date 2019/1/18
+     * @Param request
+     */
+    @RequestMapping("/updateSceneryInfo")
+    @ResponseBody
+    public Map<String, Object> updateSceneryInfo(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>(16);
+        Map<String, Object> paras = new HashMap<>(16);
+        String id = request.getParameter("id");
+        String mer_central = request.getParameter("mer_central");
+        String mer_duplex = request.getParameter("mer_duplex");
+        paras.put("id", id);
+        paras.put("mer_central", mer_central);
+        paras.put("mer_duplex", mer_duplex == "" ? mer_central : mer_duplex);
+        int num = captureTouristInfoService.updateSceneryInfo(paras);
+        if (num != 0) {
+            result.put("status", "success");
+            result.put("msg", "操作成功");
+        } else {
+            result.put("status", "error");
+            result.put("msg", "操作失败");
         }
         return result;
     }

@@ -125,7 +125,7 @@
         FROM
             bx_merchant
         WHERE
-            mer_name LIKE #{merName}
+            mer_name = #{merName}
         AND state = #{state}
         AND province = #{province}
     </select>
@@ -152,7 +152,16 @@
         WHERE
           id = #{id}
     </update>
-
+    <!--修改自动添加的坐标点位原始Gps坐标-->
+    <update id="updateSceneryInfo">
+        UPDATE
+          bx_merchant
+        SET
+          mer_central = #{mer_central}
+          ,mer_duplex = #{mer_duplex}
+        WHERE
+          id = #{id}
+    </update>
 
 
 </mapper>

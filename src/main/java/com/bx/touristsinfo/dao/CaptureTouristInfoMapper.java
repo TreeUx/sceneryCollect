@@ -42,4 +42,6 @@ public interface CaptureTouristInfoMapper {
     int udateSceneryInfo(BxMerchant bmc);
 
     int checkPsw(Map<String, Object> para);
+
+    int updateSceneryInfo(Map<String, Object> paras);
 }

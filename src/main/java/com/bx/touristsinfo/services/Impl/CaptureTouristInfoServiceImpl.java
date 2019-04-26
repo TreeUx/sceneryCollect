@@ -155,5 +155,17 @@ public class CaptureTouristInfoServiceImpl implements CaptureTouristInfoService 
         return captureTouristInfoMapper.checkPsw(para);
     }
 
+    /**
+     * @return java.util.Map<java.lang.String   ,   java.lang.Object>
+     * @Author Breach
+     * @Description 修改自动添加的景点坐标为Gps坐标
+     * @Date 2019/1/18
+     * @Param request
+     */
+    @Override
+    public int updateSceneryInfo(Map<String, Object> paras) {
+        return captureTouristInfoMapper.updateSceneryInfo(paras);
+    }
+
 
 }

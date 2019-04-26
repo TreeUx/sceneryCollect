@@ -161,6 +161,7 @@ function removeClick() {
  * @return
  */
 function addNewSceneryInfos(map, lng, lat, title, data, marker) {
+    var id = "" //景点id
     var mer_name = "" //景点名称
     var mer_address = "" //详细地址
     var mer_begining = "" // 服务开始时间
@@ -172,22 +173,34 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var traffic_info = "" //交通信息
     var merchantId = "" //景点id
     var mer_central = "" //中心点坐标
+    var mer_duplex = "" //双向出入口坐标
     if (data != undefined && data != null && data != "") {
+        id = data.id
         mer_name = data.mer_name
         mer_address = data.mer_address
         mer_begining = data.mer_begining
         mer_moment = data.mer_moment
         mer_best = (data.mer_best == undefined ? "" : data.mer_best)
-        mer_type = data.mer_type
+        mer_type = data.mer_type == 0 ? 4 : data.mer_type
         ticket_info = (data.ticket_info == undefined ? "" : data.ticket_info)
         traffic_info = (data.traffic_info == undefined ? "" : data.traffic_info)
         mer_introduce = (data.mer_introduce == undefined ? "" : data.mer_introduce)
         merchantId = data.id
-        mer_central = data.mer_central // 数据库取出的原始坐标
+        mer_central = data.mer_central // 数据库取出的原始中心点坐标
+        mer_duplex = data.mer_duplex // 数据库取出的原始双向出入口坐标
     }
     var pointList = new Array()
     pointList.push(new BMap.Point(lng, lat))
+    // 将景点中心点坐标转换为Gps坐标
     transToGps(pointList, "#mer_central")
+    if(mer_duplex != undefined && mer_duplex != null && mer_duplex != "") {
+        var lng_duplex = mer_duplex.substring(0, mer_duplex.indexOf(",")) // 双向出入口坐标经度
+        var lat_duplex = mer_duplex.substring(mer_duplex.indexOf(",") + 1, mer_duplex.length) // 双向出入口坐标纬度
+        var pointList1 = new Array()
+        pointList1.push(new BMap.Point(lng_duplex, lat_duplex))
+        // 将景点双向出入口坐标转换为Gps坐标
+        transToGps(pointList1, "#mer_duplex")
+    }
     //右键菜单
     var content = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" style="margin-left: 24px;" aria-hidden="true" >' +
         '<div class="modal-dialog">' +
@@ -241,6 +254,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '</div>' +
         '<input id="merchantId" name="merchantId" type="hidden" value="' + merchantId + '"/>' +
         '<input id="mer_central" name="mer_central" type="hidden" value="' + mer_central + '"/>' +
+        '<input id="mer_duplex" name="mer_duplex" type="hidden"/>' +
         '<div class="col-sm-9"><label id="location" style="margin-left: 10px;">' + lng + "," + lat + '</label></div>' +
         '</div>' +
         '</div>' +
@@ -383,6 +397,35 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
             /*转换坐标点 End*/
         }
     }, 50);
+    setTimeout(function () {
+        // 修改中心点坐标及双向出入口坐标为Gps坐标
+        updateSceneryInfo(id, $("#mer_central").val(), $("#mer_duplex").val())
+    }, 1000)
+}
+
+// 修改保存的百度坐标为原始Gps坐标
+function updateSceneryInfo(id, mer_central_up, mer_duplex_up) {
+    $.ajax({
+        url: "updateSceneryInfo",
+        type: "post",
+        data: {
+            "id": id,
+            "mer_central": mer_central_up,
+            "mer_duplex": mer_duplex_up
+        },
+        dataType: "json",
+        success: function (data) {
+            if (data.status == "success") {
+                // console.log(data)
+            } else {
+                // removeTeriminiAnimation()
+                // showSuccessOrErrorModal(data.msg, "error");
+            }
+        },
+        error: function (e) {
+            showSuccessOrErrorModal("网络异常！", "error");
+        }
+    })
 }
 
 //百度坐标转换为原始坐标
@@ -399,7 +442,7 @@ function transToGps(pointList, $name) {
                 var x = tempPoint.lng
                 var y = tempPoint.lat
                 console.log(x + "," + y)
-                transedPointStrs = transedPointStrs + (x.toFixed(10) + "," + y.toFixed(10) + " ")  //拼接转换后的坐标
+                transedPointStrs = transedPointStrs + (x.toFixed(10) + "," + y.toFixed(10))  //拼接转换后的坐标
                 // $("#mer_central").val(transedPointStrs) //设置隐藏input为原始坐标
                 $($name).val(transedPointStrs) //设置隐藏input为原始坐标
             }
@@ -503,7 +546,7 @@ function captureParkInfo() {
     var provinceId = $("#province").val() //省id
     var city = $("#city").find("option:selected").text() //市
     var cityId = $("#city").val() //市id
-    var scenery_name = $("#scenery_name").val() //景点名称
+    // var scenery_name = $("#scenery_name").val() //景点名称
     if (scenery_name != "") { //根据搜索的景区信息展示相应的出入口标记及线路
         showMap((city == "" ? province : city) + scenery_name) //展示景点地图
         $("#capture_scenery_input").val("采集中...")
@@ -522,6 +565,8 @@ function captureParkInfo() {
                     console.log(data)
                     $("#capture_scenery_input").val("采集完毕")
                     removeAnimation() // 去除动态效果
+                    // 自动采集保存的景点名称
+                    var scenery_name = data.mer_name
                     setTimeout(function () {
                         queryAddSceneryInfo(stateId, provinceId, scenery_name) //展示添加框
                     }, 500)
@@ -562,7 +607,6 @@ function removeAnimation() {
 
 //查询自动录入的景点信息
 function queryAddSceneryInfo(state, province, scenery_name) {
-    debugger
     var state = state
     var province = province
     var scenery_name = scenery_name
@@ -577,7 +621,6 @@ function queryAddSceneryInfo(state, province, scenery_name) {
         dataType: "json",
         success: function (data) {
             if (data.status == "success") {
-                debugger
                 data = $.parseJSON(JSON.stringify(data)).data[0]
                 var mer_central = data.mer_central
                 var lng = mer_central.substring(0, mer_central.indexOf(","))
