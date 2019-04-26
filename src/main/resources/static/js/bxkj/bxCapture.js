@@ -199,7 +199,11 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         var pointList1 = new Array()
         pointList1.push(new BMap.Point(lng_duplex, lat_duplex))
         // 将景点双向出入口坐标转换为Gps坐标
-        transToGps(pointList1, "#mer_duplex")
+        if(mer_duplex == "") {
+            transToGps(pointList, "#mer_duplex")
+        } else {
+            transToGps(pointList1, "#mer_duplex")
+        }
     }
     //右键菜单
     var content = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" style="margin-left: 24px;" aria-hidden="true" >' +

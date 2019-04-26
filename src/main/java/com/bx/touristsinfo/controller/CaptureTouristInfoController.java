@@ -512,18 +512,19 @@ public class CaptureTouristInfoController {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         BxMerchant bmc = new BxMerchant();
         String merchantId = request.getParameter("merchantId");
-        String merDuplex = ""; //双向出入口
+//        String merDuplex = ""; //双向出入口
         if (merchantId != "" && merchantId != null) {
             int merId = Integer.parseInt(merchantId);
             bmc.setId(merId); //景点Id
         }
-        String[] mer_duplex = request.getParameterValues("mer_duplex"); //出入口坐标
+//        String[] mer_duplex = request.getParameterValues("mer_duplex"); //出入口坐标
         String merName = request.getParameter("scenery_name_add");
         String state = request.getParameter("state");
         String province = request.getParameter("province");
         String city = request.getParameter("city");
         String merAddress = request.getParameter("mer_address");
         String merCentral = request.getParameter("mer_central"); //中心点坐标
+        String merDuplex = request.getParameter("mer_duplex"); //双向出入口坐标
         Date merBegining = sdf.parse(request.getParameter("scenery_start_time"));
         Date merMoment = sdf.parse(request.getParameter("scenery_end_time"));
         String bestTime = request.getParameter("mer_best");
@@ -541,12 +542,12 @@ public class CaptureTouristInfoController {
         bmc.setProvince(province); //省
         bmc.setCity(("null".equals(city) || city == null) ? province : city); //城市
         bmc.setMerAddress(merAddress); //详细地址
-        if (mer_duplex != null && mer_duplex.length != 0) {
+       /* if (mer_duplex != null && mer_duplex.length != 0) {
             for (int i = 0; i < mer_duplex.length; i++) {
                 merDuplex += (mer_duplex[i] + " ");
             }
-        }
-        bmc.setMerDuplex(merDuplex);//双向出入口
+        }*/
+        bmc.setMerDuplex(merDuplex == "" ? merCentral : merDuplex);//双向出入口
         bmc.setMerCentral(merCentral); //中心点坐标
         bmc.setMerBegining(merBegining); //服务开始时间
         bmc.setMerMoment(merMoment); //服务结束时间
